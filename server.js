@@ -4,6 +4,8 @@ var bodyParser = require('body-parser');
 var nodemailer = require('nodemailer');
 var hbs = require('nodemailer-express-handlebars');
 var path = require('path');
+var mongoose = require('mongoose');
+
 
 var app = new express();
 
@@ -20,8 +22,55 @@ app.get('/getPhotos',function(request, response) {
     response.status(200).send(photos);
 })
 
+/**********************************************************************************
+    Mongoosejs open
+***********************************************************************************/
+  // getting-started.js
+mongoose.connect('mongodb://admin:Busts1@ds257640.mlab.com:57640/wadu_results');
 
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', function() {
+  // we're connected!
+});
 
+var app = new express();
+
+var kittySchema = mongoose.Schema({
+    name: String
+  });
+
+var Kitten = mongoose.model('Kitten', kittySchema);
+
+var silence = new Kitten({ name: 'Silence' });
+console.log(silence.name); // 'Silence'
+
+// NOTE: methods must be added to the schema before compiling it with mongoose.model()
+kittySchema.methods.speak = function () {
+    var greeting = this.name
+      ? "Meow name is " + this.name
+      : "I don't have a name";
+    console.log(greeting);
+  }
+  var Kitten = mongoose.model('Kitten', kittySchema);
+
+  var fluffy = new Kitten({ name: 'fluffy' });
+  fluffy.speak(); // "Meow name is fluffy"
+
+  fluffy.save(function (err, fluffy) {
+    if (err) return console.error(err);
+    fluffy.speak();
+  });
+
+  Kitten.find(function (err, kittens) {
+    if (err) return console.error(err);
+    console.log(kittens);
+  })
+
+  Kitten.find({ name: /^fluff/ }, callback);
+/***********************************************************************************
+    Mongoosejs end
+************************************************************************************/
 
 app.post('/sendEmail', function(request, response) {
     'use strict';
